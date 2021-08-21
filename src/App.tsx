@@ -41,9 +41,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-
 function App() {
   const CITIES_API_URL = "https://simplemaps.com/static/data/country-cities/nl/nl_spreadsheet.json";
+  const SORT_BY = "city";
+  const SORT_DIRECTION = "SortDirection.ASC";
   const [sortBy, setSortBy] = useState<CitiesTableSortBy>("city");
   const [sortDirection, setSortDirection] = useState(SortDirection.ASC);
   const [cities, setCities] = useState<City[]>([]);
@@ -51,37 +52,16 @@ function App() {
   const [loading, setLoading] = React.useState(false);
   const classes = useStyles();
 
-  useEffect(() => {
-    const getCities = (): void => {
-      setLoading(true);
-      fetch(CITIES_API_URL)
-        .then(result => result.json())
-        .then(result => {
-          var headers = result.shift();
-          const cityIndex = headers.indexOf("city");
-          const adminNameIndex = headers.indexOf("admin_name");
-          const populationIndex = headers.indexOf("population");
-
-          result = result.map((city: any) => new City(city[cityIndex], city[adminNameIndex], city[populationIndex]));
-          result = sortCities(result);
-          setCities(result);
-          setAllCities(result);
-        })
-        .finally(() => setLoading(false));
-    };
-    getCities();
-  }, [])
-
-  const sortCities = (cities: City[], sort_by: CitiesTableSortBy = sortBy, sort_direction: string = sortDirection): City[] => {
+  const sortCities = React.useCallback((cities: City[], sortBy: CitiesTableSortBy = SORT_BY, sortDirection = SORT_DIRECTION) => {
     let result = cities.sort((item1, item2) => {
-      let val1 = item1[sort_by];
-      let val2 = item2[sort_by];
+      let val1 = item1[sortBy];
+      let val2 = item2[sortBy];
       return val1 === val2 ? 0 : val1 > val2 ? 1 : -1;
     });
 
-    if (sort_direction === SortDirection.DESC) result.reverse();
+    if (sortDirection === SortDirection.DESC) result.reverse();
     return result;
-  }
+  }, []);
 
   const sortTable = (sortObj: any): void => {
     const { sortBy, sortDirection } = sortObj;
@@ -103,6 +83,28 @@ function App() {
 
     setCities(result);
   }
+
+  useEffect(() => {
+    const getCities = (): void => {
+      setLoading(true);
+      fetch(CITIES_API_URL)
+        .then(result => result.json())
+        .then(result => {
+          var headers = result.shift();
+          const cityIndex = headers.indexOf("city");
+          const adminNameIndex = headers.indexOf("admin_name");
+          const populationIndex = headers.indexOf("population");
+
+          result = result.map((city: any) => new City(city[cityIndex], city[adminNameIndex], city[populationIndex]));
+          result = sortCities(result, SORT_BY,);
+          setCities(result);
+          setAllCities(result);
+        })
+        .finally(() => setLoading(false));
+    };
+    getCities();
+  }, [sortCities])
+
 
   return (
     <Grid container alignItems="center" direction="column" className={classes.grid}>
