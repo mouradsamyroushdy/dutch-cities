@@ -130,7 +130,7 @@ function App() {
         <AutoSizer disableWidth>
           {({ height }) =>
             <Table
-              width={1000}
+              width={600}
               height={height}
               headerHeight={20}
               rowHeight={30}
@@ -140,9 +140,9 @@ function App() {
               rowCount={cities.length}
               rowGetter={({ index }) => cities[index]}
             >
-              <Column label="City" dataKey="city" width={400} />
-              <Column label="Province" dataKey="admin_name" width={300} />
-              <Column label="Population" dataKey="population" width={300} />
+              <Column label="City" dataKey="city" width={200} />
+              <Column label="Province" dataKey="admin_name" width={200} />
+              <Column label="Population" dataKey="population" width={200} />
             </Table>
           }
         </AutoSizer>
