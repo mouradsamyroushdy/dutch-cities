@@ -52,6 +52,23 @@ function App() {
   const classes = useStyles();
 
   useEffect(() => {
+    const getCities = (): void => {
+      setLoading(true);
+      fetch(CITIES_API_URL)
+        .then(result => result.json())
+        .then(result => {
+          var headers = result.shift();
+          const cityIndex = headers.indexOf("city");
+          const adminNameIndex = headers.indexOf("admin_name");
+          const populationIndex = headers.indexOf("population");
+
+          result = result.map((city: any) => new City(city[cityIndex], city[adminNameIndex], city[populationIndex]));
+          result = sortCities(result);
+          setCities(result);
+          setAllCities(result);
+        })
+        .finally(() => setLoading(false));
+    };
     getCities();
   }, [])
 
@@ -59,7 +76,7 @@ function App() {
     let result = cities.sort((item1, item2) => {
       let val1 = item1[sort_by];
       let val2 = item2[sort_by];
-      return val1 == val2 ? 0 : val1 > val2 ? 1 : -1;
+      return val1 === val2 ? 0 : val1 > val2 ? 1 : -1;
     });
 
     if (sort_direction === SortDirection.DESC) result.reverse();
@@ -73,24 +90,6 @@ function App() {
     setSortBy(sortBy);
     setSortDirection(sortDirection);
   };
-
-  const getCities = (): void => {
-    setLoading(true);
-    fetch(CITIES_API_URL)
-      .then(result => result.json())
-      .then(result => {
-        var headers = result.shift();
-        const cityIndex = headers.indexOf("city");
-        const adminNameIndex = headers.indexOf("admin_name");
-        const populationIndex = headers.indexOf("population");
-
-        result = result.map((city: any) => new City(city[cityIndex], city[adminNameIndex], city[populationIndex]));
-        result = sortCities(result);
-        setCities(result);
-        setAllCities(result);
-      })
-      .finally(() => setLoading(false));
-  }
 
   const onKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = e.target.value.toLowerCase().trim();
